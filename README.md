@@ -1,107 +1,201 @@
-# 構造主観力学 AIコアエンジン (SSD Core Engine)
+# SSD Core Engine - 構造主観力学 汎用AIエンジン
 
-[](https://www.python.org/downloads/)
-[](https://www.google.com/search?q=./)
+## 📁 プロジェクト構成
 
-このリポジトリは、独自の理論体系\*\*「構造主観力学（Structural Subjectivity Dynamics: SSD）」\*\*を、自律的に思考・行動するAIエージェントとして動作させるためのコアエンジンをPythonで実装したものです。
+元の大きなファイル（1,126行）を以下の8つのモジュールに分割しました：
 
-このエンジンは、単に合理的な判断を下すだけでなく、内部状態（感情や本能に相当）の力学に基づき、安定的（整合的）な振る舞いと、予測困難で創造的（跳躍的）な振る舞いを動的に生み出すことを目的としています。
+### 🔧 コアモジュール
+- **`ssd_types.py`** - 基本型定義・データ構造
+- **`ssd_meaning_pressure.py`** - 意味圧システム  
+- **`ssd_alignment_leap.py`** - 整合・跳躍システム
+- **`ssd_decision.py`** - 意思決定・行動システム
+- **`ssd_prediction.py`** - 予測・未来分析システム
+- **`ssd_utils.py`** - ユーティリティ関数
+- **`ssd_engine.py`** - メイン統合エンジン
 
-## 🏛️ 実装されているSSDの主要概念
+### 🧪 テスト・サポート
+- **`test_ssd.py`** - テスト・使用例
+- **`__init__.py`** - パッケージ初期化
 
-このエンジンは、SSD理論の以下の核心概念をモジュールとして実装しています。
+## 🚀 使用方法
 
-  * **四層構造モデル (`LayerType`)**: AIの内部状態を、**物理・基層・中核・上層**という動かしにくさの異なる4つの階層で管理します。
-  * **意味圧 (`MeaningPressureProcessor`)**: 周囲のオブジェクトを知覚し、それがAIの内部状態に与える影響（意味圧）を計算し、「未処理圧 `E`」として蓄積します。
-  * **整合 (`AlignmentProcessor`)**: 過去の経験（整合慣性 `kappa`）に基づき、安定した反応を試みます。
-  * **跳躍 (`LeapProcessor`)**: 未処理圧 `E` が閾値を超えた際に、確率的に内部構造を大きく変化させる「跳躍」を実行します。
-  * **意思決定 (`DecisionSystem`)**: 現在の内部状態と整合慣性に基づき、最適な行動を選択します。未処理圧が高い場合は、より探索的な行動を取りやすくなります。
-  * **未来予測 (`PredictionSystem`)**: 周囲の状況変化を予測し、食料枯渇などの危機を事前に検知します。
-
-## ✨ 主な特徴
-
-  * **基層的色付け (Survival-Driven Behavior)**
-    オブジェクトの `survival_relevance`（生存関連度）を自動計算し、意思決定や跳躍のプロセスに強く影響させます。これにより、AIは平時と危機的状況で異なる、より人間らしい振る舞いを見せます。
-
-  * **反応の二段階モデル (Two-Stage Reaction System)**
-    刺激に対して、まず本能的な（基層）即時反応が起こり、少し遅れて理性的な（中核・上層）再処理が行われるという、人間らしい反応の時間差をシミュレートします。
-
-  * **動的な学習と適応**
-    行動の結果を`ActionEvaluator`が記録・評価し、成功体験を「整合慣性 `kappa`」として蓄積することで、環境に適応し、徐々に賢くなっていきます。
-
-  * **モジュール化された設計**
-    理論の各概念が独立したクラスとして実装されており、理解しやすく拡張性に優れた構造になっています。
-
-## 🚀 クイックスタート
-
-このエンジンは、数行のコードで簡単に動作させることができます。
-
-### 1\. 必要なライブラリ
-
-`numpy`が必要です。
-
-```bash
-pip install numpy
-```
-
-### 2\. 基本的な使用例
-
-以下のコードは、AIエージェントを生成し、10ステップのシミュレーションを実行する基本的な例です。
+### 基本的な使い方
 
 ```python
-import random
+# エンジンの初期化
 from ssd_engine import create_ssd_engine, setup_basic_structure
 from ssd_utils import create_simple_world_objects
 
-# 1. SSDエンジンの初期化
-engine = create_ssd_engine("test_agent_1")
+# エンジン作成
+engine = create_ssd_engine("my_agent")
 setup_basic_structure(engine)
 
-# 2. シミュレーション用の世界のオブジェクトを作成
+# オブジェクト作成
 world_objects = create_simple_world_objects()
 
-# 3. シミュレーションループを実行
-for step_num in range(10):
-    print(f"\n--- Step {step_num + 1} ---")
+# シミュレーション実行
+for step in range(10):
+    # オブジェクト知覚
+    perceived = [world_objects[0]]
+    actions = ["approach", "avoid", "investigate"]
     
-    # AIがランダムにオブジェクトを知覚
-    perceived_obj = random.choice(world_objects)
+    # ステップ実行
+    result = engine.step(perceived, actions)
     
-    # AIが取りうる行動のリスト
-    available_actions = ["approach", "avoid", "investigate", "use"]
-    
-    # エンジンの1ステップを実行し、結果を取得
-    result = engine.step([perceived_obj], available_actions)
-    
-    # 結果の表示
-    print(f"Perceived: {perceived_obj.id} (type: {perceived_obj.type})")
-    if 'decision' in result:
-        print(f"Decision: {result['decision']['chosen_action']}")
-    print(f"Energy (E): {result['system_state']['energy']['E']:.2f}")
-    
-    # もし跳躍が発生したら表示
-    if 'leap' in result:
-        print(f"🚀 LEAP OCCURRED: {result['leap']['leap_type']}")
-
-# 最終状態の表示
-final_state = engine.get_system_state()
-print(f"\n=== Final State ===")
-print(f"Total decisions: {final_state.cognition['decision_history_length']}")
-print(f"Learned patterns: {final_state.cognition['global_kappa_size']}")
+    print(f"Decision: {result['decision']['chosen_action']}")
+    print(f"Energy: {result['system_state']['energy']['E']:.2f}")
 ```
 
-## 📂 ファイル構成
+### 高度な機能
 
-  * `ssd_engine.py`: 全てのモジュールを統合し、メインの処理サイクルを実行するコアエンジン。
-  * `ssd_types.py`: `LayerType`や`ObjectInfo`など、理論の基本となるデータ構造を定義。
-  * `ssd_meaning_pressure.py`: 意味圧の計算と未処理圧`E`の管理を担当。
-  * `ssd_alignment_leap.py`: 理論の核心である「整合」と「跳躍」の力学を実装。
-  * `ssd_decision.py`: 内部状態に基づき、AIの行動選択を行う。
-  * `ssd_prediction.py`: 未来の状態を予測し、危機的状況を検知する。
-  * `ssd_utils.py`: システムの監視、メンテナンス、テストデータ生成などの補助機能。
-  * `test_ssd.py`: 基本的な動作を確認するためのテストスクリプト。
-  * `test_enhanced_features.py`: 「二段階反応」など、より高度な機能のテストスクリプト。
+```python
+# 未来予測
+prediction = engine.predict_future_state("food_item_1")
+print(f"Crisis level: {prediction.crisis_level}")
 
-## 📖 理論との関係
+# 危機検出
+crisis = engine.detect_crisis_conditions()
+print(f"Crisis detected: {crisis['crisis_detected']}")
 
-このコードベースは、別途提供されている構造主観力学の理論ドキュメント群を具現化したものです。理論の理解を深めるため、並行して参照することを推奨します。
+# システムヘルス監視
+health = engine.get_health_status()
+print(f"System health: {health['status']}")
+```
+
+## 🧠 構造主観力学理論の実装
+
+### 四層構造システム
+- **物理層（Physical）**: 絶対制約・基本法則
+- **基層（Base）**: 本能・感情・生存欲求
+- **中核層（Core）**: アイデンティティ・価値観・記憶
+- **上層（Upper）**: 概念・理念・抽象思考
+
+### 核心メカニズム
+- **意味圧（Meaning Pressure）**: 構造に作用する変化の力
+- **整合（Alignment）**: 安定維持メカニズム
+- **跳躍（Leap）**: 非連続的構造変化
+- **基層的色付け**: 生存関連の優先処理
+
+## 📊 パフォーマンス特徴
+
+- **メモリ効率**: 自動キャッシュ管理・圧縮
+- **予測精度**: トレンド分析・信頼度計算
+- **学習能力**: 整合慣性による経験学習
+- **危機対応**: リアルタイム危機検出
+
+## 🔧 開発者向け情報
+
+### モジュール詳細
+
+#### ssd_types.py
+基本的なデータ構造と列挙型を定義
+- `LayerType`: 四層構造の列挙型
+- `ObjectInfo`: オブジェクト情報クラス
+- `StructuralState`: 構造状態クラス
+
+#### ssd_meaning_pressure.py  
+意味圧処理の核心ロジック
+- 数学的厳密性を持つ意味圧計算
+- 類似度計算・キャッシュシステム
+- 構造的相互作用の処理
+
+#### ssd_alignment_leap.py
+整合・跳躍メカニズムの実装
+- 整合流計算・整合慣性更新
+- 跳躍条件判定・確率的実行
+- 基層的色付け統合
+
+#### ssd_decision.py
+意思決定・行動評価システム
+- 生存関連行動の優先化
+- 探索・活用バランス制御  
+- 行動成功率学習
+
+#### ssd_prediction.py
+未来予測・危機検出システム
+- トレンド分析・予測信頼度
+- 多段階危機レベル判定
+- キャッシュ付き高速予測
+
+#### ssd_utils.py
+ヘルパー関数・監視機能
+- システム監視・診断
+- メンテナンス管理
+- テスト用オブジェクト生成
+
+#### ssd_engine.py
+統合エンジン・公開API
+- 全モジュールの協調制御
+- 統一インターフェース
+- システム状態管理
+
+## 🎯 分割のメリット
+
+### 保守性
+- 各機能が独立したファイル
+- 責務が明確に分離
+- バグの局所化
+
+### 可読性  
+- モジュールサイズの最適化（100-300行）
+- 機能ごとの理解が容易
+- ドキュメント化の簡素化
+
+### テスト性
+- モジュール単位でのテスト
+- 依存関係の明確化
+- デバッグの効率化
+
+### 拡張性
+- 新機能追加の容易さ
+- 既存機能への影響最小化
+- プラグイン的な機能追加
+
+### 再利用性
+- 必要な部分のみ使用可能
+- 他プロジェクトでの部分利用
+- ライブラリ化の準備
+
+## ⚠️ 注意事項
+
+### インポートエラーについて
+現在、各モジュール間のインポートでエラーが発生する可能性があります。これを解決するには：
+
+1. すべてのファイルが同じディレクトリにあることを確認
+2. Python の PYTHONPATH にディレクトリを追加
+3. または、各ファイルでパス追加コードを使用
+
+### 使用前の準備
+```bash
+# ディレクトリ移動
+cd ssd_core_engine
+
+# Python パス設定
+export PYTHONPATH=$PYTHONPATH:$(pwd)
+
+# または、実行時に以下を追加
+import sys
+import os
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+```
+
+## 📝 今後の改善予定
+
+- [ ] インポートエラーの完全解決
+- [ ] 単体テストの追加
+- [ ] 型ヒントの強化
+- [ ] ドキュメント生成の自動化
+- [ ] パフォーマンスベンチマーク
+- [ ] 設定ファイル対応
+
+## 📖 理論背景
+
+この実装は Hermann Degner の構造主観力学理論に基づいています：
+- GitHub: https://github.com/HermannDegner/Structural-Subjectivity-Dynamics
+- 四層構造による人間認知モデル
+- 意味圧・整合・跳躍の数理モデル
+- 基層的色付けによる生存優先処理
+
+---
+
+**構造主観力学（SSD）**: 宇宙のあらゆる現象を「安定と変化の動態」として理解するための統一理論

@@ -15,8 +15,14 @@ from typing import Dict, List, Set, Tuple, Optional, Any
 from collections import defaultdict
 from dataclasses import dataclass
 
-from .ssd_types import LayerType, ObjectInfo
-from .ssd_meaning_pressure import MeaningPressureProcessor
+try:
+    # 相対インポート（パッケージとして使用時）
+    from .ssd_types import LayerType, ObjectInfo
+    from .ssd_meaning_pressure import MeaningPressureProcessor
+except ImportError:
+    # 絶対インポート（直接実行時）
+    from .ssd_types import LayerType, ObjectInfo
+    from .ssd_meaning_pressure import MeaningPressureProcessor
 
 
 @dataclass
@@ -97,9 +103,9 @@ class TerritoryProcessor:
         self.meaning_processor = MeaningPressureProcessor()
         
         # SSD理論パラメータ
-        self.territory_claim_threshold = 0.6  # 縄張り主張の閾値
+        self.territory_claim_threshold = 0.3  # 縄張り主張の閾値（テスト用に低く設定）
         self.boundary_strength_decay = 0.02   # 境界強度の減衰率
-        self.innerness_learning_rate = 0.1    # 内側度学習率
+        self.innerness_learning_rate = 0.2    # 内側度学習率（学習を高速化）
         
     def initialize_npc_boundaries(self, npc_id: str) -> None:
         """NPCの主観的境界を初期化"""
@@ -153,8 +159,10 @@ class TerritoryProcessor:
         
         # 縄張り主張の判定
         if experience_valence > self.territory_claim_threshold:
+            print(f"🏘️ T{tick}: {npc_id} 縄張り評価開始 - 価値:{experience_valence:.2f}")
             territory_result = self._evaluate_territory_claim(npc_id, location, experience, tick)
             if territory_result:
+                print(f"🏘️ T{tick}: {npc_id} 縄張り形成成功! {territory_result}")
                 result['territorial_changes'].append(territory_result)
         
         # 共同経験による集団境界形成
@@ -212,6 +220,7 @@ class TerritoryProcessor:
         
         # 安全感の計算（SSD理論ベース）
         safety_feeling = self._calculate_safety_feeling(npc_id, location)
+        print(f"🏘️ {npc_id} 安全感:{safety_feeling:.3f} 閾値:{self.territory_claim_threshold}")
         
         if safety_feeling >= self.territory_claim_threshold:
             # 新しい縄張りを作成
@@ -392,6 +401,125 @@ class TerritoryProcessor:
         
         return result
     
+    def process_territorial_defense(self, defender_npc: str, intruder_location: Tuple[float, float], 
+                                  intruder_type: str, current_tick: int) -> Dict[str, Any]:
+        """縄張り防衛行動の処理（人間NPCs用）"""
+        result = {
+            'defense_action': 'none',
+            'cooperation_boost': 0.0,
+            'fear_response': 0.0,
+            'group_mobilization': False,
+            'recommended_behavior': 'normal'
+        }
+        
+        # 防衛者の縄張りチェック
+        if defender_npc not in self.npc_territories:
+            return result
+            
+        territory_id = self.npc_territories[defender_npc]
+        territory = self.territories[territory_id]
+        
+        # 侵入レベルの計算
+        distance_from_center = territory.get_distance_from_center(intruder_location)
+        intrusion_level = max(0, 1.0 - (distance_from_center / territory.radius))
+        
+        if intrusion_level > 0:
+            # 侵入者タイプ別反応
+            if intruder_type == 'predator':
+                # 捕食者に対する反応
+                result['defense_action'] = 'predator_alert'
+                result['fear_response'] = min(1.0, intrusion_level * 1.5)
+                result['cooperation_boost'] = 0.8  # 協力意欲向上
+                
+                if intrusion_level > 0.7:
+                    result['group_mobilization'] = True
+                    result['recommended_behavior'] = 'group_defense'
+                elif intrusion_level > 0.4:
+                    result['recommended_behavior'] = 'defensive_positioning'
+                else:
+                    result['recommended_behavior'] = 'heightened_awareness'
+                    
+            elif intruder_type == 'hostile_human':
+                # 敵対的人間に対する反応
+                result['defense_action'] = 'territorial_display'
+                result['cooperation_boost'] = 0.6
+                
+                if intrusion_level > 0.8:
+                    result['recommended_behavior'] = 'aggressive_expulsion'
+                elif intrusion_level > 0.5:
+                    result['recommended_behavior'] = 'threatening_display'
+                else:
+                    result['recommended_behavior'] = 'cautious_monitoring'
+                    
+            elif intruder_type == 'unknown_human':
+                # 未知の人間に対する反応
+                boundary = self.subjective_boundaries[defender_npc]
+                
+                if intrusion_level > 0.6:
+                    result['defense_action'] = 'cautious_approach'
+                    result['recommended_behavior'] = 'diplomatic_contact'
+                else:
+                    result['defense_action'] = 'monitoring'
+                    result['recommended_behavior'] = 'careful_observation'
+        
+        # 集団縄張りの場合、他メンバーにも通知
+        if len(territory.members) > 1:
+            result['alert_group_members'] = True
+            result['group_coordination'] = True
+            
+        return result
+
+    def check_threat_intrusion(self, npc_id: str, threat_location: Tuple[float, float], 
+                             threat_type: str) -> Dict[str, Any]:
+        """脅威侵入の検知（外側認知による防衛反応）"""
+        result = {
+            'is_threat_to_territory': False,
+            'threat_level': 0.0,
+            'defensive_urgency': 0.0,
+            'recommended_response': 'none'
+        }
+        
+        # NPCが縄張りを持っているかチェック
+        if npc_id not in self.npc_territories:
+            return result
+            
+        territory_id = self.npc_territories[npc_id]
+        territory = self.territories[territory_id]
+        
+        # 脅威が縄張り内または近辺にあるかチェック
+        distance_from_center = territory.get_distance_from_center(threat_location)
+        threat_radius = territory.radius * 1.5  # 警戒範囲を縄張りより広く設定
+        
+        if distance_from_center <= threat_radius:
+            result['is_threat_to_territory'] = True
+            
+            # 脅威レベルの計算（近いほど高い）
+            threat_level = max(0, 1.0 - (distance_from_center / threat_radius))
+            result['threat_level'] = threat_level
+            
+            # 脅威タイプ別の緊急度
+            urgency_multipliers = {
+                'predator': 1.5,
+                'hostile_human': 1.2,
+                'unknown_human': 0.8,
+                'resource_competitor': 1.0
+            }
+            
+            urgency = threat_level * urgency_multipliers.get(threat_type, 1.0)
+            result['defensive_urgency'] = min(1.0, urgency)
+            
+            # 推奨対応の決定
+            if urgency > 0.8:
+                result['recommended_response'] = 'immediate_group_defense'
+            elif urgency > 0.6:
+                result['recommended_response'] = 'alert_and_prepare'
+            elif urgency > 0.3:
+                result['recommended_response'] = 'increase_vigilance'
+            else:
+                result['recommended_response'] = 'monitor_situation'
+                
+        return result
+
     def decay_boundaries(self) -> None:
         """境界強度の自然減衰"""
         for npc_id, boundary in self.subjective_boundaries.items():

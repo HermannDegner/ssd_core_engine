@@ -8,7 +8,7 @@ import random
 import numpy as np
 from typing import Dict, List, Optional, Tuple, Any
 from collections import defaultdict, deque
-from ssd_types import LayerType, StructuralState, AlignmentResult, LeapResult, ObjectInfo
+from .ssd_types import LayerType, StructuralState, AlignmentResult, LeapResult, ObjectInfo
 
 
 class AlignmentProcessor:

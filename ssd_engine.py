@@ -10,30 +10,30 @@ from collections import defaultdict, deque
 
 # 内部モジュールのインポート
 try:
-    from ssd_types import (
+    from .ssd_types import (
         LayerType, ObjectInfo, StructuralState, AlignmentResult, 
         LeapResult, DecisionInfo, PredictionResult, SystemState
     )
-    from ssd_meaning_pressure import MeaningPressureProcessor
-    from ssd_alignment_leap import AlignmentProcessor, LeapProcessor
-    from ssd_decision import DecisionSystem, ActionEvaluator
-    from ssd_prediction import PredictionSystem
-    from ssd_utils import SystemMonitor, MaintenanceManager
+    from .ssd_meaning_pressure import MeaningPressureProcessor
+    from .ssd_alignment_leap import AlignmentProcessor, LeapProcessor
+    from .ssd_decision import DecisionSystem, ActionEvaluator
+    from .ssd_prediction import PredictionSystem
+    from .ssd_utils import SystemMonitor, MaintenanceManager
 except ImportError:
     # 開発時の直接実行用フォールバック
     import sys
     import os
     sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
     
-    from ssd_types import (
+    from .ssd_types import (
         LayerType, ObjectInfo, StructuralState, AlignmentResult, 
         LeapResult, DecisionInfo, PredictionResult, SystemState
     )
-    from ssd_meaning_pressure import MeaningPressureProcessor
-    from ssd_alignment_leap import AlignmentProcessor, LeapProcessor
-    from ssd_decision import DecisionSystem, ActionEvaluator
-    from ssd_prediction import PredictionSystem
-    from ssd_utils import SystemMonitor, MaintenanceManager
+    from .ssd_meaning_pressure import MeaningPressureProcessor
+    from .ssd_alignment_leap import AlignmentProcessor, LeapProcessor
+    from .ssd_decision import DecisionSystem, ActionEvaluator
+    from .ssd_prediction import PredictionSystem
+    from .ssd_utils import SystemMonitor, MaintenanceManager
 
 
 class SSDCoreEngine:
@@ -68,6 +68,17 @@ class SSDCoreEngine:
         self.system_monitor = SystemMonitor()
         self.maintenance_manager = MaintenanceManager()
         
+        # 縄張りシステム統合
+        try:
+            from .ssd_territory import TerritoryProcessor
+            self.territory_processor = TerritoryProcessor()
+        except ImportError:
+            try:
+                from .ssd_territory import TerritoryProcessor
+                self.territory_processor = TerritoryProcessor()
+            except ImportError:
+                self.territory_processor = None
+        
         # オブジェクト認知システム
         self.perceived_objects: Dict[str, ObjectInfo] = {}
         self.attention_focus: Optional[str] = None
@@ -76,19 +87,31 @@ class SSDCoreEngine:
         self.current_time = 0
         self.experience_log = []
 
-    def add_structural_element(self, layer: LayerType, element_id: str, 
-                             initial_connections: Dict[str, float] = None,
+    def add_structural_element(self, layer: LayerType, element_id: str,
+                             obj_or_connections = None,
                              stability: float = None):
-        """構造要素を追加"""
+        """構造要素を追加（ObjectInfoまたはコネクションを受け取る）"""
         if stability is None:
             stability = 1.0 / self.layer_mobility[layer]  # 層に応じた安定度
-            
+
+        # ObjectInfoが渡された場合とDict[str, float]が渡された場合を処理
+        if isinstance(obj_or_connections, ObjectInfo):
+            # ObjectInfoの場合は、perceived_objectsに追加してStructuralStateを作成
+            self.perceived_objects[obj_or_connections.id] = obj_or_connections
+            initial_connections = {}
+        elif isinstance(obj_or_connections, dict):
+            # 辞書の場合は接続情報として扱う
+            initial_connections = obj_or_connections
+        else:
+            # その他の場合は空の接続
+            initial_connections = obj_or_connections or {}
+
         self.layers[layer][element_id] = StructuralState(
             layer=layer,
-            connections=initial_connections or {},
+            connections=initial_connections,
             stability=stability
         )
-    
+
     def perceive_object(self, obj_info: ObjectInfo) -> float:
         """オブジェクトを知覚・認識"""
         self.perceived_objects[obj_info.id] = obj_info
@@ -407,6 +430,75 @@ class SSDCoreEngine:
         """システムヘルス状況の取得"""
         system_state = self.get_system_state()
         return self.system_monitor.check_system_health(system_state)
+    
+    # ======= 縄張りシステムメソッド =======
+    
+    def create_territory_v2(self, center: Tuple[float, float], radius: float, owner_npc: str) -> str:
+        """縄張り作成（v2版）"""
+        if not self.territory_processor:
+            return None
+            
+        # 縄張り経験を処理して縄張り作成
+        territory_result = self.territory_processor.process_territorial_experience(
+            npc_id=owner_npc,
+            location=center,
+            experience_type='safe_rest',
+            experience_valence=0.8,  # 高い安心感
+            tick=self.current_time
+        )
+        
+        # 作成された縄張りIDを返す
+        for change in territory_result.get('territorial_changes', []):
+            if change['action'] == 'territory_claimed':
+                return change['territory_id']
+        
+        return None
+    
+    def check_territory_contains_v2(self, territory_id: str, location: Tuple[float, float]) -> bool:
+        """縄張り内包含チェック（v2版）"""
+        if not self.territory_processor or not territory_id:
+            return False
+            
+        # 縄張り情報を取得
+        territory = self.territory_processor.territories.get(territory_id)
+        return territory.contains(location) if territory else False
+    
+    def invite_to_territory_v2(self, territory_id: str, invitee_npc: str) -> bool:
+        """縄張りへの招待（v2版）"""
+        if not self.territory_processor or not territory_id:
+            return False
+            
+        # 縄張り情報を取得
+        territory = self.territory_processor.territories.get(territory_id)
+        if not territory:
+            return False
+        
+        # 招待者を縄張りに追加
+        territory.add_member(invitee_npc)
+        
+        # NPCの縄張りマッピングを更新
+        self.territory_processor.npc_territories[invitee_npc] = territory_id
+        
+        return True
+        
+    def get_territory_info(self, territory_id: str) -> Optional[Dict]:
+        """縄張り情報取得"""
+        if not self.territory_processor or not territory_id:
+            return None
+            
+        territory = self.territory_processor.territories.get(territory_id)
+        if not territory:
+            return None
+            
+        return {
+            'territory_id': territory.territory_id,
+            'center': territory.center,
+            'radius': territory.radius,
+            'owner': territory.owner_npc,
+            'members': list(territory.members),
+            'established_tick': territory.established_tick,
+            'community_size': territory.get_community_size()
+        }
 
 
 # エクスポート用の関数

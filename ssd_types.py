@@ -1,6 +1,22 @@
 """
 SSD Types and Core Data Structures
 構造主観力学 - 基本型定義
+
+💡 FUNDAMENTAL PRINCIPLE:
+整合慣性κ (Coherence Inertia) = 記憶蓄積フレームワーク
+
+κは物理的な慣性と同様に、主観的体験の蓄積による「心理的慣性」を表現する。
+過去の体験が現在の判断に与える影響の強度として機能し、
+記憶に基づく適応的行動の基盤となる。
+
+κ値の意味:
+- 低κ: 新規体験、記憶蓄積が少ない状態  
+- 高κ: 豊富な記憶、強い適応傾向を持つ状態
+
+【Structure Subjective Dynamics】における κ の位置づけ:
+物理層から意識層までの四層構造において、κは各層の「記憶密度」を表し、
+主観的体験の物理的実装として機能する。これにより、エージェントは
+過去の体験を現在の行動決定に統合できる真の学習システムを実現する。
 """
 
 from enum import Enum
@@ -8,6 +24,9 @@ from dataclasses import dataclass, field
 from typing import Dict, List, Any, Optional
 import random
 import numpy as np
+
+# 🔗 SSD基礎理論参照: https://github.com/HermannDegner/Structural-Subjectivity-Dynamics
+# この実装は常に基礎理論リポジトリの指定に従います
 
 
 class LayerType(Enum):

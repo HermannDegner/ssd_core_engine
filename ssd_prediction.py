@@ -7,7 +7,7 @@ import random
 import numpy as np
 from typing import Dict, List, Optional, Tuple, Any
 from collections import deque
-from ssd_types import ObjectInfo, PredictionResult
+from .ssd_types import ObjectInfo, PredictionResult
 
 
 class PredictionSystem:

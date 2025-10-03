@@ -7,7 +7,7 @@ import random
 import numpy as np
 from typing import Dict, List, Optional
 from collections import defaultdict
-from ssd_types import ObjectInfo, LayerType, StructuralState
+from .ssd_types import ObjectInfo, LayerType, StructuralState
 
 
 class MeaningPressureProcessor:
