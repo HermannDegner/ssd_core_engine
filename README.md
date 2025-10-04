@@ -1,12 +1,49 @@
 # SSD Core Engine - 構造主観力学 汎用AIエンジン
 
+[![Python Package](https://img.shields.io/badge/python-3.8%2B-blue)](https://python.org)
+[![Version](https://img.shields.io/badge/version-1.0.0-green)](https://github.com/HermannDegner/ssd_core_engine)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
 Hermann Degnerの[構造主観力学理論](https://github.com/HermannDegner/Structural-Subjectivity-Dynamics)の完全実装
 
-## 📁 プロジェクト構成
+**pip でインストール可能なPythonパッケージです！**
+
+## � クイックスタート
+
+### インストール
+
+```bash
+# PyPI からインストール（将来）
+pip install ssd-core-engine
+
+# ローカルファイルからインストール
+pip install dist/ssd_core_engine-1.0.0-py3-none-any.whl
+```
+
+### 基本的な使用方法
+
+```python
+from ssd_core_engine import SSDCoreEngine
+
+# エンジンの初期化
+engine = SSDCoreEngine(agent_id="my_agent")
+
+# 基本的な処理
+perceived = {"food_item_1": 0.8, "threat_signal": 0.2}
+actions = ["approach", "retreat", "investigate"]
+result = engine.step(perceived, actions)
+
+print(f"Decision: {result['decision']['chosen_action']}")
+print(f"Energy: {result['system_state']['energy']['E']:.2f}")
+```
+
+## 📦 パッケージ構成
 
 効率的な開発・保守のため、機能別にフォルダー分けされています：
 
-### 🎯 コアエンジン (ルート)
+### 📦 メインパッケージ (`ssd_core_engine/`)
+- **`__init__.py`** - パッケージエントリーポイント
+- **`ssd_engine.py`** - メイン統合エンジン
 - **`ssd_types.py`** - 基本型定義・データ構造
 - **`ssd_meaning_pressure.py`** - 意味圧システム  
 - **`ssd_alignment_leap.py`** - 整合・跳躍システム
@@ -14,8 +51,12 @@ Hermann Degnerの[構造主観力学理論](https://github.com/HermannDegner/Str
 - **`ssd_prediction.py`** - 予測・未来分析システム
 - **`ssd_utils.py`** - ユーティリティ関数
 - **`ssd_territory.py`** - 縄張りシステム（最適化版）
-- **`ssd_engine.py`** - メイン統合エンジン
-- **`__init__.py`** - パッケージ初期化
+
+### 📋 パッケージ設定
+- **`setup.py`** - パッケージインストール設定
+- **`pyproject.toml`** - モダンなPythonパッケージ設定
+- **`requirements.txt`** - 依存関係定義
+- **`LICENSE`** - MITライセンス
 
 ### 📚 [docs/](docs/) - ドキュメント
 - アーキテクチャガイドライン
@@ -39,13 +80,12 @@ Hermann Degnerの[構造主観力学理論](https://github.com/HermannDegner/Str
 ### 基本的な使い方
 
 ```python
-# エンジンの初期化
-from ssd_engine import create_ssd_engine, setup_basic_structure
-from ssd_utils import create_simple_world_objects
+# パッケージからインポート
+from ssd_core_engine import SSDCoreEngine
+from ssd_core_engine.ssd_utils import create_simple_world_objects
 
 # エンジン作成
-engine = create_ssd_engine("my_agent")
-setup_basic_structure(engine)
+engine = SSDCoreEngine(agent_id="my_agent")
 
 # オブジェクト作成
 world_objects = create_simple_world_objects()
@@ -53,7 +93,7 @@ world_objects = create_simple_world_objects()
 # シミュレーション実行
 for step in range(10):
     # オブジェクト知覚
-    perceived = [world_objects[0]]
+    perceived = {"food_item_1": 0.8, "threat_signal": 0.2}
     actions = ["approach", "avoid", "investigate"]
     
     # ステップ実行
@@ -77,6 +117,13 @@ print(f"Crisis detected: {crisis['crisis_detected']}")
 # システムヘルス監視
 health = engine.get_health_status()
 print(f"System health: {health['status']}")
+
+# 縄張りシステム（最適化版）
+from ssd_core_engine.ssd_territory import TerritoryProcessor
+
+territory = TerritoryProcessor(layer_mobility=0.3)
+result = territory.process(engine.get_current_state())
+print(f"Territory stability: {result.stability}")
 ```
 
 ## 🧠 構造主観力学理論の実装
