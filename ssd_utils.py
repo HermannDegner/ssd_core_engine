@@ -6,7 +6,14 @@ SSD Utility Functions and Helper Classes
 import random
 import numpy as np
 from typing import Dict, List, Any
-from .ssd_types import ObjectInfo, LayerType, SystemState, StructuralState
+
+try:
+    from .ssd_types import ObjectInfo, LayerType, SystemState, StructuralState
+except ImportError:
+    import sys
+    import os
+    sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+    from ssd_types import ObjectInfo, LayerType, SystemState, StructuralState
 
 
 def create_simple_world_objects() -> List[ObjectInfo]:

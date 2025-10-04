@@ -21,8 +21,11 @@ try:
     from .ssd_meaning_pressure import MeaningPressureProcessor
 except ImportError:
     # 絶対インポート（直接実行時）
-    from .ssd_types import LayerType, ObjectInfo
-    from .ssd_meaning_pressure import MeaningPressureProcessor
+    import sys
+    import os
+    sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+    from ssd_types import LayerType, ObjectInfo
+    from ssd_meaning_pressure import MeaningPressureProcessor
 
 
 @dataclass
@@ -83,9 +86,9 @@ class SubjectiveBoundary:
 
 
 class TerritoryProcessor:
-    """SSD Core Engine用縄張りプロセッサー"""
+    """SSD Core Engine用縄張りプロセッサー（SSD理論統合版）"""
     
-    def __init__(self):
+    def __init__(self, layer_mobility: Optional[Dict[LayerType, float]] = None):
         # 縄張り管理
         self.territories: Dict[str, TerritoryInfo] = {}
         self.npc_territories: Dict[str, str] = {}  # {npc_id: territory_id}
@@ -103,6 +106,12 @@ class TerritoryProcessor:
         self.meaning_processor = MeaningPressureProcessor()
         
         # SSD理論パラメータ
+        self.layer_mobility = layer_mobility or {
+            LayerType.PHYSICAL: 0.1,  # 最も動きにくい
+            LayerType.BASE: 0.3,      
+            LayerType.CORE: 0.6,      
+            LayerType.UPPER: 0.9      # 最も動きやすい
+        }
         self.territory_claim_threshold = 0.3  # 縄張り主張の閾値（テスト用に低く設定）
         self.boundary_strength_decay = 0.02   # 境界強度の減衰率
         self.innerness_learning_rate = 0.2    # 内側度学習率（学習を高速化）

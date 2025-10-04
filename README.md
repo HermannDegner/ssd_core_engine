@@ -1,21 +1,38 @@
 # SSD Core Engine - 構造主観力学 汎用AIエンジン
 
+Hermann Degnerの[構造主観力学理論](https://github.com/HermannDegner/Structural-Subjectivity-Dynamics)の完全実装
+
 ## 📁 プロジェクト構成
 
-元の大きなファイル（1,126行）を以下の8つのモジュールに分割しました：
+効率的な開発・保守のため、機能別にフォルダー分けされています：
 
-### 🔧 コアモジュール
+### 🎯 コアエンジン (ルート)
 - **`ssd_types.py`** - 基本型定義・データ構造
 - **`ssd_meaning_pressure.py`** - 意味圧システム  
 - **`ssd_alignment_leap.py`** - 整合・跳躍システム
 - **`ssd_decision.py`** - 意思決定・行動システム
 - **`ssd_prediction.py`** - 予測・未来分析システム
 - **`ssd_utils.py`** - ユーティリティ関数
+- **`ssd_territory.py`** - 縄張りシステム（最適化版）
 - **`ssd_engine.py`** - メイン統合エンジン
-
-### 🧪 テスト・サポート
-- **`test_ssd.py`** - テスト・使用例
 - **`__init__.py`** - パッケージ初期化
+
+### 📚 [docs/](docs/) - ドキュメント
+- アーキテクチャガイドライン
+- 拡張機能説明
+
+### 🧪 [tests/](tests/) - テストスイート  
+- メインエンジンテスト
+- 拡張機能テスト
+- 縄張りシステムテスト
+
+### 📜 [scripts/](scripts/) - ユーティリティ
+- デモスクリプト
+- コードチェックツール
+- 詳細分析ツール
+
+### 🗄️ [archive/](archive/) - アーカイブ
+- 非推奨ファイル
 
 ## 🚀 使用方法
 

@@ -7,7 +7,14 @@ import random
 import numpy as np
 from typing import Dict, List, Optional, Tuple, Any
 from collections import deque
-from .ssd_types import LayerType, StructuralState, DecisionInfo, ObjectInfo
+
+try:
+    from .ssd_types import LayerType, StructuralState, DecisionInfo, ObjectInfo
+except ImportError:
+    import sys
+    import os
+    sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+    from ssd_types import LayerType, StructuralState, DecisionInfo, ObjectInfo
 
 
 class DecisionSystem:

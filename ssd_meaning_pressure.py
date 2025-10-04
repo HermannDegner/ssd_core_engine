@@ -7,7 +7,14 @@ import random
 import numpy as np
 from typing import Dict, List, Optional
 from collections import defaultdict
-from .ssd_types import ObjectInfo, LayerType, StructuralState
+
+try:
+    from .ssd_types import ObjectInfo, LayerType, StructuralState
+except ImportError:
+    import sys
+    import os
+    sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+    from ssd_types import ObjectInfo, LayerType, StructuralState
 
 
 class MeaningPressureProcessor:

@@ -25,15 +25,15 @@ except ImportError:
     import os
     sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
     
-    from .ssd_types import (
+    from ssd_types import (
         LayerType, ObjectInfo, StructuralState, AlignmentResult, 
         LeapResult, DecisionInfo, PredictionResult, SystemState
     )
-    from .ssd_meaning_pressure import MeaningPressureProcessor
-    from .ssd_alignment_leap import AlignmentProcessor, LeapProcessor
-    from .ssd_decision import DecisionSystem, ActionEvaluator
-    from .ssd_prediction import PredictionSystem
-    from .ssd_utils import SystemMonitor, MaintenanceManager
+    from ssd_meaning_pressure import MeaningPressureProcessor
+    from ssd_alignment_leap import AlignmentProcessor, LeapProcessor
+    from ssd_decision import DecisionSystem, ActionEvaluator
+    from ssd_prediction import PredictionSystem
+    from ssd_utils import SystemMonitor, MaintenanceManager
 
 
 class SSDCoreEngine:
@@ -71,11 +71,11 @@ class SSDCoreEngine:
         # 縄張りシステム統合
         try:
             from .ssd_territory import TerritoryProcessor
-            self.territory_processor = TerritoryProcessor()
+            self.territory_processor = TerritoryProcessor(self.layer_mobility)
         except ImportError:
             try:
-                from .ssd_territory import TerritoryProcessor
-                self.territory_processor = TerritoryProcessor()
+                from ssd_territory import TerritoryProcessor
+                self.territory_processor = TerritoryProcessor(self.layer_mobility)
             except ImportError:
                 self.territory_processor = None
         
