@@ -1,0 +1,4 @@
+[console_scripts]
+ssd-check = scripts.final_check:main
+ssd-demo = scripts.demo_enhanced:main
+ssd-territory-test = scripts.detailed_territory_test:main

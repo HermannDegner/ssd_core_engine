@@ -1,0 +1,9 @@
+numpy>=1.20.0
+typing-extensions>=4.0.0
+
+# 開発用依存関係（オプション）
+# pytest>=6.0
+# pytest-cov>=2.0  
+# black>=21.0
+# flake8>=3.8
+# mypy>=0.800

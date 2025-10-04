@@ -1,0 +1,97 @@
+[build-system]
+requires = ["setuptools>=45", "wheel", "setuptools-scm"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "ssd-core-engine"
+version = "1.0.0"
+description = "構造主観力学（SSD）理論の完全実装 - 汎用AIコアエンジン"
+readme = "README.md"
+requires-python = ">=3.8"
+license = "MIT"
+authors = [
+    {name = "Hermann Degner", email = "hermann.degner@example.com"}
+]
+maintainers = [
+    {name = "Hermann Degner", email = "hermann.degner@example.com"}
+]
+keywords = [
+    "ai", "artificial-intelligence", "cognitive-science", 
+    "structural-subjectivity-dynamics", "ssd", "psychology",
+    "complex-systems", "emergence", "consciousness"
+]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Science/Research",
+    "Intended Audience :: Developers",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9", 
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+]
+dependencies = [
+    "numpy>=1.20.0",
+    "typing-extensions>=4.0.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=6.0",
+    "pytest-cov>=2.0", 
+    "black>=21.0",
+    "flake8>=3.8",
+    "mypy>=0.800",
+]
+test = [
+    "pytest>=6.0",
+    "pytest-cov>=2.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/HermannDegner/ssd_core_engine"
+Repository = "https://github.com/HermannDegner/ssd_core_engine"
+Documentation = "https://github.com/HermannDegner/ssd_core_engine/tree/main/docs"
+"Bug Reports" = "https://github.com/HermannDegner/ssd_core_engine/issues"
+"Theory Repository" = "https://github.com/HermannDegner/Structural-Subjectivity-Dynamics"
+
+[project.scripts]
+ssd-demo = "scripts.demo_enhanced:main"
+ssd-check = "scripts.final_check:main"
+ssd-territory-test = "scripts.detailed_territory_test:main"
+
+[tool.setuptools]
+packages = ["ssd_core_engine"]
+include-package-data = true
+
+[tool.setuptools.package-data]
+"*" = ["*.md", "*.txt", "*.rst"]
+
+[tool.black]
+line-length = 100
+target-version = ['py38', 'py39', 'py310', 'py311']
+include = '\.pyi?$'
+extend-exclude = '''
+/(
+  # directories
+  \.eggs
+  | \.git
+  | \.hg
+  | \.mypy_cache
+  | \.tox
+  | \.venv
+  | build
+  | dist
+)/
+'''
+
+[tool.pytest.ini_options]
+minversion = "6.0"
+addopts = "-ra -q --strict-markers"
+testpaths = [
+    "tests",
+]
+python_files = ["test_*.py", "*_test.py"]
