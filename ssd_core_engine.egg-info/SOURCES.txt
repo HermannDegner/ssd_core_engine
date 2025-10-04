@@ -4,6 +4,7 @@ LICENSE
 ORGANIZATION_COMPLETE.md
 README.md
 pyproject.toml
+requirements.txt
 setup.py
 __pycache__/__init__.cpython-311.pyc
 __pycache__/ssd_alignment_leap.cpython-311.pyc
@@ -16,6 +17,8 @@ __pycache__/ssd_types.cpython-311.pyc
 __pycache__/ssd_utils.cpython-311.pyc
 archive/README.md
 archive/README_SPLIT.py
+dist/ssd_core_engine-1.0.0-py3-none-any.whl
+dist/ssd_core_engine-1.0.0.tar.gz
 docs/ARCHITECTURE_GUIDELINES.md
 docs/ENHANCED_FEATURES.md
 docs/README.md
@@ -23,6 +26,7 @@ scripts/README.md
 scripts/code_check_fix.py
 scripts/demo_enhanced.py
 scripts/detailed_territory_test.py
+scripts/distribution_options.py
 scripts/final_check.py
 ssd_core_engine/__init__.py
 ssd_core_engine/ssd_alignment_leap.py
@@ -40,6 +44,15 @@ ssd_core_engine.egg-info/entry_points.txt
 ssd_core_engine.egg-info/not-zip-safe
 ssd_core_engine.egg-info/requires.txt
 ssd_core_engine.egg-info/top_level.txt
+ssd_core_engine/__pycache__/__init__.cpython-311.pyc
+ssd_core_engine/__pycache__/ssd_alignment_leap.cpython-311.pyc
+ssd_core_engine/__pycache__/ssd_decision.cpython-311.pyc
+ssd_core_engine/__pycache__/ssd_engine.cpython-311.pyc
+ssd_core_engine/__pycache__/ssd_meaning_pressure.cpython-311.pyc
+ssd_core_engine/__pycache__/ssd_prediction.cpython-311.pyc
+ssd_core_engine/__pycache__/ssd_territory.cpython-311.pyc
+ssd_core_engine/__pycache__/ssd_types.cpython-311.pyc
+ssd_core_engine/__pycache__/ssd_utils.cpython-311.pyc
 tests/README.md
 tests/test_enhanced_features.py
 tests/test_ssd.py
