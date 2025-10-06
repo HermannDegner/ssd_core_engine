@@ -68,16 +68,50 @@ class SSDCoreEngine:
         self.system_monitor = SystemMonitor()
         self.maintenance_manager = MaintenanceManager()
         
-        # 縄張りシステム統合
+        # 主観的境界システム統合 (Hermann Degner理論ベース)
         try:
-            from .ssd_territory import TerritoryProcessor
-            self.territory_processor = TerritoryProcessor(self.layer_mobility)
+            from .ssd_subjective_boundary import SubjectiveBoundaryProcessor
+            self.boundary_processor = SubjectiveBoundaryProcessor(self.layer_mobility)
+            # 後方互換性のためのエイリアス
+            self.territory_processor = self.boundary_processor
         except ImportError:
             try:
-                from ssd_territory import TerritoryProcessor
+                from .ssd_territory import TerritoryProcessor
                 self.territory_processor = TerritoryProcessor(self.layer_mobility)
+                self.boundary_processor = self.territory_processor
             except ImportError:
-                self.territory_processor = None
+                try:
+                    from ssd_subjective_boundary import SubjectiveBoundaryProcessor
+                    self.boundary_processor = SubjectiveBoundaryProcessor(self.layer_mobility)
+                    self.territory_processor = self.boundary_processor
+                except ImportError:
+                    try:
+                        from ssd_territory import TerritoryProcessor
+                        self.territory_processor = TerritoryProcessor(self.layer_mobility)
+                        self.boundary_processor = self.territory_processor
+                    except ImportError:
+                        self.territory_processor = None
+                        self.boundary_processor = None
+        
+        # 🚀 Hermann Degner理論の完全実装 - 拡張機能
+        try:
+            from .ssd_enhanced_leap import ChaoticLeapProcessor, StructuralTheoria, NarrativeSphereDepthModel
+            self.chaotic_leap_processor = ChaoticLeapProcessor()
+            self.structural_theoria = StructuralTheoria()
+            self.narrative_depth_model = NarrativeSphereDepthModel()
+            self.enhanced_ssd_features = True
+        except ImportError:
+            try:
+                from ssd_enhanced_leap import ChaoticLeapProcessor, StructuralTheoria, NarrativeSphereDepthModel
+                self.chaotic_leap_processor = ChaoticLeapProcessor()
+                self.structural_theoria = StructuralTheoria()
+                self.narrative_depth_model = NarrativeSphereDepthModel()
+                self.enhanced_ssd_features = True
+            except ImportError:
+                self.chaotic_leap_processor = None
+                self.structural_theoria = None
+                self.narrative_depth_model = None
+                self.enhanced_ssd_features = False
         
         # オブジェクト認知システム
         self.perceived_objects: Dict[str, ObjectInfo] = {}
@@ -431,15 +465,15 @@ class SSDCoreEngine:
         system_state = self.get_system_state()
         return self.system_monitor.check_system_health(system_state)
     
-    # ======= 縄張りシステムメソッド =======
+    # ======= 主観的境界システムメソッド (Hermann Degner理論) =======
     
-    def create_territory_v2(self, center: Tuple[float, float], radius: float, owner_npc: str) -> str:
-        """縄張り作成（v2版）"""
-        if not self.territory_processor:
+    def create_boundary_v2(self, center: Tuple[float, float], radius: float, owner_npc: str) -> str:
+        """主観的境界作成（Hermann Degner理論v2版）"""
+        if not self.boundary_processor:
             return None
             
-        # 縄張り経験を処理して縄張り作成
-        territory_result = self.territory_processor.process_territorial_experience(
+        # 主観的境界経験を処理して境界作成
+        boundary_result = self.boundary_processor.process_boundary_experience(
             npc_id=owner_npc,
             location=center,
             experience_type='safe_rest',
@@ -447,31 +481,42 @@ class SSDCoreEngine:
             tick=self.current_time
         )
         
-        # 作成された縄張りIDを返す
-        for change in territory_result.get('territorial_changes', []):
-            if change['action'] == 'territory_claimed':
-                return change['territory_id']
+        # 作成された主観的境界IDを返す
+        for change in boundary_result.get('boundary_changes', []):
+            if change.get('action') in ['boundary_claimed', 'new_boundary_created', 'new_boundary']:
+                return change.get('boundary_id') or change.get('boundary_info', {}).get('boundary_id')
         
         return None
     
-    def check_territory_contains_v2(self, territory_id: str, location: Tuple[float, float]) -> bool:
-        """縄張り内包含チェック（v2版）"""
-        if not self.territory_processor or not territory_id:
-            return False
-            
-        # 縄張り情報を取得
-        territory = self.territory_processor.territories.get(territory_id)
-        return territory.contains(location) if territory else False
+    # 後方互換性エイリアス
+    def create_territory_v2(self, center: Tuple[float, float], radius: float, owner_npc: str) -> str:
+        """縄張り作成（v2版） - 後方互換性エイリアス"""
+        return self.create_boundary_v2(center, radius, owner_npc)
     
-    def invite_to_territory_v2(self, territory_id: str, invitee_npc: str) -> bool:
-        """縄張りへの招待（v2版）"""
-        if not self.territory_processor or not territory_id:
+    def check_boundary_contains_v2(self, boundary_id: str, location: Tuple[float, float]) -> bool:
+        """主観的境界内包含チェック（Hermann Degner理論v2版）"""
+        if not self.boundary_processor or not boundary_id:
             return False
             
-        # 縄張り情報を取得
-        territory = self.territory_processor.territories.get(territory_id)
-        if not territory:
+        # 主観的境界情報を取得
+        boundary = self.boundary_processor.boundaries.get(boundary_id)
+        return boundary.contains(location) if boundary else False
+    
+    # 後方互換性エイリアス
+    def check_territory_contains_v2(self, territory_id: str, location: Tuple[float, float]) -> bool:
+        """縄張り内包含チェック（v2版） - 後方互換性エイリアス"""
+        return self.check_boundary_contains_v2(territory_id, location)
+    
+    def invite_to_boundary_v2(self, boundary_id: str, invitee_npc: str) -> bool:
+        """主観的境界への招待（Hermann Degner理論v2版）"""
+        if not self.boundary_processor or not boundary_id:
             return False
+        return self.boundary_processor.add_npc_to_boundary(boundary_id, invitee_npc)
+    
+    # 後方互換性エイリアス
+    def invite_to_territory_v2(self, territory_id: str, invitee_npc: str) -> bool:
+        """縄張りへの招待（v2版） - 後方互換性エイリアス"""
+        return self.invite_to_boundary_v2(territory_id, invitee_npc)
         
         # 招待者を縄張りに追加
         territory.add_member(invitee_npc)
@@ -481,24 +526,211 @@ class SSDCoreEngine:
         
         return True
         
-    def get_territory_info(self, territory_id: str) -> Optional[Dict]:
-        """縄張り情報取得"""
-        if not self.territory_processor or not territory_id:
+    def get_boundary_info(self, boundary_id: str) -> Optional[Dict]:
+        """主観的境界情報取得（Hermann Degner理論）"""
+        if not self.boundary_processor or not boundary_id:
             return None
             
-        territory = self.territory_processor.territories.get(territory_id)
-        if not territory:
+        boundary = self.boundary_processor.boundaries.get(boundary_id)
+        if not boundary:
             return None
             
         return {
-            'territory_id': territory.territory_id,
-            'center': territory.center,
-            'radius': territory.radius,
-            'owner': territory.owner_npc,
-            'members': list(territory.members),
-            'established_tick': territory.established_tick,
-            'community_size': territory.get_community_size()
+            'boundary_id': boundary.boundary_id,
+            'center': boundary.center,
+            'radius': boundary.radius,
+            'owner': boundary.owner_npc,
+            'members': list(boundary.members),
+            'boundary_strength': boundary.boundary_strength,
+            'established_tick': boundary.established_tick,
         }
+    
+    # 後方互換性エイリアス
+    def get_territory_info(self, territory_id: str) -> Optional[Dict]:
+        """縄張り情報取得 - 後方互換性エイリアス"""
+        return self.get_boundary_info(territory_id)
+    
+    # 🚀 Hermann Degner理論の完全実装 - 新メソッド群
+    
+    def perform_chaotic_leap_analysis(self, meaning_pressure: float, layer: LayerType) -> Dict[str, any]:
+        """
+        カオス的跳躍分析の実行
+        
+        Hermann Degner理論の核心：真の非線形性・予測困難性の実装
+        """
+        if not self.enhanced_ssd_features or not self.chaotic_leap_processor:
+            return {"error": "拡張機能が利用できません"}
+        
+        # 現在の整合状態を取得
+        layer_structures = self.layers.get(layer, {})
+        total_alignment = sum(state.stability for state in layer_structures.values()) / max(1, len(layer_structures))
+        
+        # 真のカオス的跳躍分析
+        leap_event = self.chaotic_leap_processor.execute_leap(
+            meaning_pressure, total_alignment, layer, layer_structures
+        )
+        
+        # 跳躍パターン分析
+        patterns = self.chaotic_leap_processor.analyze_leap_patterns()
+        
+        # システム状態
+        system_state = self.chaotic_leap_processor.get_system_state()
+        
+        return {
+            "leap_occurred": leap_event is not None,
+            "leap_event": leap_event.__dict__ if leap_event else None,
+            "patterns": patterns,
+            "system_state": system_state,
+            "theoretical_basis": "Hermann_Degner_SSD_Chaos_Theory"
+        }
+    
+    def perform_structural_theoria_analysis(self, phenomenon_description: str, 
+                                          phenomenon_data: Dict = None) -> Dict[str, any]:
+        """
+        構造観照（テオーリア）による客観的分析
+        
+        Hermann Degner理論：判断保留による純粋な構造分析
+        """
+        if not self.enhanced_ssd_features or not self.structural_theoria:
+            return {"error": "構造観照機能が利用できません"}
+        
+        # 現象データの準備
+        if phenomenon_data is None:
+            phenomenon_data = {
+                "description": phenomenon_description,
+                "current_structures": {
+                    layer.value: list(structures.keys()) 
+                    for layer, structures in self.layers.items()
+                },
+                "energy_sources": [self.meaning_processor.E],
+                "hierarchy": ["physical", "base", "core", "upper"]
+            }
+        
+        # 構造観照による客観的分析
+        analysis = self.structural_theoria.analyze_phenomenon_objectively(phenomenon_data)
+        
+        return {
+            "theoria_analysis": analysis,
+            "judgment_suspension": self.structural_theoria.judgment_suspension,
+            "emotional_distance": self.structural_theoria.emotional_distance,
+            "theoretical_basis": "Hermann_Degner_Structural_Theoria",
+            "warning": "この分析は価値判断を含まず、純粋な構造分析です"
+        }
+    
+    def analyze_narrative_depth(self, narrative_text: str, target_layer: LayerType = None) -> Dict[str, any]:
+        """
+        語り圏深度モデルによる分析
+        
+        Hermann Degner理論：L1-L5の実在性階層分析
+        """
+        if not self.enhanced_ssd_features or not self.narrative_depth_model:
+            return {"error": "語り圏深度モデルが利用できません"}
+        
+        # 語りの深度分類
+        depth_level, confidence = self.narrative_depth_model.classify_narrative_depth(narrative_text)
+        
+        # 各層への影響力計算
+        layer_influences = {}
+        for layer in LayerType:
+            influence = self.narrative_depth_model.calculate_narrative_influence(depth_level, layer)
+            layer_influences[layer.value] = influence
+        
+        # 特定層への影響（指定された場合）
+        target_influence = None
+        if target_layer:
+            target_influence = self.narrative_depth_model.calculate_narrative_influence(depth_level, target_layer)
+        
+        return {
+            "narrative": narrative_text,
+            "depth_level": depth_level.name,
+            "depth_value": depth_level.value,
+            "classification_confidence": confidence,
+            "layer_influences": layer_influences,
+            "target_layer_influence": target_influence,
+            "theoretical_basis": "Hermann_Degner_Narrative_Sphere_Depth_Model",
+            "depth_explanation": {
+                1: "L1: 客観的事実",
+                2: "L2: 科学的解釈", 
+                3: "L3: 社会的合意",
+                4: "L4: 個人的信念",
+                5: "L5: 神・絶対的存在"
+            }
+        }
+    
+    def get_comprehensive_ssd_analysis(self) -> Dict[str, any]:
+        """
+        Hermann Degner構造主観力学理論の包括的分析
+        
+        理論の6つの核心概念すべてを統合した分析
+        """
+        if not self.enhanced_ssd_features:
+            return {"error": "拡張SSD機能が利用できません", "basic_features_only": True}
+        
+        analysis = {
+            "theoretical_framework": "Hermann_Degner_Structural_Subjectivity_Dynamics",
+            "core_concepts": {
+                "meaning_pressure": "意味圧 - 構造に作用するあらゆるエネルギー・影響",
+                "alignment": "整合 - エネルギー効率の良い安定状態維持", 
+                "leap": "跳躍 - 非連続的で予測困難な構造変化",
+                "four_layer_structure": "四層構造 - 物理・基層・中核・上層の階層",
+                "structural_theoria": "構造観照 - 判断保留による冷静分析",
+                "narrative_depth": "語り圏深度 - L1-L5の実在性階層"
+            },
+            "current_system_state": {}
+        }
+        
+        # 1. 意味圧状態
+        analysis["current_system_state"]["meaning_pressure"] = {
+            "total_pressure": self.meaning_processor.E,
+            "experience_count": len(self.meaning_processor.experience_log)
+        }
+        
+        # 2. 四層構造状態
+        analysis["current_system_state"]["four_layer_structure"] = {}
+        for layer in LayerType:
+            layer_structures = self.layers.get(layer, {})
+            analysis["current_system_state"]["four_layer_structure"][layer.value] = {
+                "structure_count": len(layer_structures),
+                "total_stability": sum(s.stability for s in layer_structures.values()),
+                "mobility": self.layer_mobility.get(layer, 0.5)
+            }
+        
+        # 3. カオス跳躍システム状態
+        if self.chaotic_leap_processor:
+            analysis["current_system_state"]["chaotic_leap_system"] = self.chaotic_leap_processor.get_system_state()
+        
+        # 4. 構造観照状態
+        if self.structural_theoria:
+            analysis["current_system_state"]["structural_theoria"] = {
+                "judgment_suspension": self.structural_theoria.judgment_suspension,
+                "emotional_distance": self.structural_theoria.emotional_distance,
+                "analytical_mode": self.structural_theoria.analytical_mode
+            }
+        
+        # 5. 主観的境界システム（Hermann Degner理論統合）
+        if self.boundary_processor:
+            analysis["current_system_state"]["subjective_boundary_system"] = {
+                "boundary_count": len(self.boundary_processor.boundaries),
+                "total_npcs": len(getattr(self.boundary_processor, 'npc_boundaries', {})),
+                "subjective_boundaries": len(self.boundary_processor.subjective_boundaries)
+            }
+        elif self.territory_processor:
+            # 後方互換性
+            analysis["current_system_state"]["territory_system"] = {
+                "territory_count": len(getattr(self.territory_processor, 'territories', {})),
+                "total_npcs": len(getattr(self.territory_processor, 'npc_territories', {}))
+            }
+        
+        # 6. システム全体の理論準拠性
+        analysis["theoretical_compliance"] = {
+            "hermann_degner_theory_implementation": True,
+            "enhanced_features_active": self.enhanced_ssd_features,
+            "chaos_theory_integration": self.chaotic_leap_processor is not None,
+            "theoria_capability": self.structural_theoria is not None,
+            "narrative_depth_analysis": self.narrative_depth_model is not None
+        }
+        
+        return analysis
 
 
 # エクスポート用の関数
